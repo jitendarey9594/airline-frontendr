@@ -1,28 +1,34 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { getFlights } from '../../api/flightApi';
+import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { getAllFlights } from '../../api/flightApi';
 import type { Flight } from '../../types/flight';
 
 interface FlightState {
   flights: Flight[];
   loading: boolean;
+  selectedFlight: Flight | null;
 }
 
 const initialState: FlightState = {
   flights: [],
   loading: false,
+  selectedFlight: null,
 };
 
 export const fetchFlights = createAsyncThunk<Flight[]>(
   'flights/fetchFlights',
   async () => {
-    return await getFlights();
+    return await getAllFlights();
   }
 );
 
 const flightSlice = createSlice({
   name: 'flights',
   initialState,
-  reducers: {},
+  reducers: {
+    setSelectedFlight(state, action: PayloadAction<Flight>) {
+      state.selectedFlight = action.payload;
+    },
+  },
   extraReducers: builder => {
     builder
       .addCase(fetchFlights.pending, state => {
@@ -38,4 +44,8 @@ const flightSlice = createSlice({
   },
 });
 
+// ✅ Export the action
+export const { setSelectedFlight } = flightSlice.actions;
+
+// ✅ Export the reducer
 export default flightSlice.reducer;

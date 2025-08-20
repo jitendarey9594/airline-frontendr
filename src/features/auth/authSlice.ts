@@ -1,11 +1,13 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import type { AuthState } from '../../types/auth';
-import { clearToken } from '../../utils/tokenUtils';
+import { clearToken, getToken } from '../../utils/tokenUtils';
 
+// Initialize state from localStorage if token exists
+const token = getToken();
 const initialState: AuthState = {
-  token: '',
-  isAuthenticated: false,
+  token: token || '',
+  isAuthenticated: !!token,
   admin: null,
 };
 
@@ -18,6 +20,15 @@ const authSlice = createSlice({
       state.admin = action.payload.admin;
       state.isAuthenticated = true;
     },
+    initializeAuth: (state) => {
+      const token = getToken();
+      if (token) {
+        state.token = token;
+        state.isAuthenticated = true;
+        // Admin info will be null until we have a way to fetch it
+        // This is fine for basic authentication checks
+      }
+    },
     logout: (state) => {
       state.token = '';
       state.admin = null;
@@ -27,5 +38,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { setAuth, logout } = authSlice.actions;
+export const { setAuth, initializeAuth, logout } = authSlice.actions;
 export default authSlice.reducer;

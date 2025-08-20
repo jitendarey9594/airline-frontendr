@@ -1,39 +1,24 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { getServices } from '../../api/serviceApi';
-import type { Service } from '../../types/service';
+import type { FlightService } from '../../types/service';
+import * as api from '../../api/serviceApi';
 
-interface ServiceState {
-  services: Service[];
-  loading: boolean;
-}
-
-const initialState: ServiceState = {
-  services: [],
-  loading: false,
-};
-
-export const fetchServices = createAsyncThunk<Service[]>(
-  'services/fetchServices',
-  async () => {
-    return await getServices(); // must return Promise<Service[]>
-  }
+export const getServices = createAsyncThunk(
+  'services/getServices',
+  async (flightId: number) => await api.fetchServicesByFlight(flightId)
 );
-
 
 const serviceSlice = createSlice({
   name: 'services',
-  initialState,
+  initialState: {
+    list: [] as FlightService[],
+    loading: false,
+  },
   reducers: {},
   extraReducers: builder => {
     builder
-      .addCase(fetchServices.pending, state => {
-        state.loading = true;
-      })
-      .addCase(fetchServices.fulfilled, (state, action) => {
-        state.services = action.payload;
-        state.loading = false;
-      })
-      .addCase(fetchServices.rejected, state => {
+      .addCase(getServices.pending, state => { state.loading = true; })
+      .addCase(getServices.fulfilled, (state, action) => {
+        state.list = action.payload;
         state.loading = false;
       });
   },

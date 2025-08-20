@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { getPassengers } from '../../api/passengerApi';
+import axios from 'axios';
 import type { Passenger } from '../../types/passenger';
 
 interface PassengerState {
@@ -12,10 +12,12 @@ const initialState: PassengerState = {
   loading: false,
 };
 
-export const fetchPassengers = createAsyncThunk<Passenger[]>(
+// ✅ Typed thunk: returns Passenger[], accepts flightId: number
+export const fetchPassengers = createAsyncThunk<Passenger[], number>(
   'passengers/fetchPassengers',
-  async () => {
-    return await getPassengers();
+  async (flightId: number) => {
+    const res = await axios.get<Passenger[]>(`/api/passengers/byFlight/${flightId}`);
+    return res.data;
   }
 );
 
