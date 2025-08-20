@@ -1,7 +1,6 @@
 import axiosInstance from './axiosInstance';
 import type { Passenger } from '../types/passenger';
 import type { PassengerCreateRequest } from '../types/passenger';
-import axios from 'axios';
 
 
 export const getPassengers = async (): Promise<Passenger[]> => {
@@ -14,7 +13,7 @@ export const getPassengerById = async (id: number): Promise<Passenger> => {
   return res.data;
 };
 
-export const createPassenger = (passenger: PassengerCreateRequest) => {
+export const createPassenger = async (passenger: PassengerCreateRequest) => {
   console.log('🔍 Frontend passenger data:', JSON.stringify(passenger, null, 2));
 
   if (!passenger.flight || !passenger.flight.flightId) {
@@ -22,14 +21,13 @@ export const createPassenger = (passenger: PassengerCreateRequest) => {
     throw new Error('Missing flight ID');
   }
 
-  // Ensure flightId is a valid number
   const flightId = Number(passenger.flight.flightId);
   if (isNaN(flightId) || flightId <= 0) {
     console.error('❌ Invalid flight ID:', passenger.flight.flightId);
     throw new Error('Invalid flight ID');
   }
 
-  // Use the same format as your working Postman request
+  // Minimal payload to match your controller and avoid cascade issues
   const backendPayload = {
     name: passenger.name,
     email: passenger.email,
@@ -40,20 +38,34 @@ export const createPassenger = (passenger: PassengerCreateRequest) => {
     mealPreference: passenger.mealPreference,
     infant: passenger.infant,
     wheelchair: passenger.wheelchair,
-    flight: {
-      flightId: flightId
-    }
+    flight: { flightId }
   };
 
-  console.log('📤 Backend payload (Postman format):', JSON.stringify(backendPayload, null, 2));
+  console.log('📤 Backend payload (minimal):', JSON.stringify(backendPayload, null, 2));
   return axiosInstance.post('/api/passengers', backendPayload);
 };
 
-
-
-
 export const updatePassenger = async (id: number, passenger: Omit<Passenger, 'passengerId'>): Promise<void> => {
-  await axiosInstance.put(`/api/passengers/${id}`, passenger);
+  // Normalize booleans to 'Y'/'N' and include only needed fields
+  const toYN = (v: any) => (v === true || v === 'Y' ? 'Y' : v === false || v === 'N' ? 'N' : v);
+
+  const payload: any = {
+    name: passenger.name,
+    dob: passenger.dob,
+    passport: passenger.passport,
+    address: passenger.address,
+    mealPreference: passenger.mealPreference,
+    wheelchair: toYN((passenger as any).wheelchair),
+    infant: toYN((passenger as any).infant),
+    email: passenger.email,
+    phone: passenger.phone,
+  };
+
+  if (passenger.flight && (passenger.flight as any).flightId) {
+    payload.flight = { flightId: (passenger.flight as any).flightId };
+  }
+
+  await axiosInstance.put(`/api/passengers/${id}`, payload);
 };
 
 export const deletePassenger = async (id: number): Promise<void> => {

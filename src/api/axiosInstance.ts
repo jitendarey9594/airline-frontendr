@@ -1,8 +1,10 @@
 import axios from 'axios';
 import { getToken, clearToken } from '../utils/tokenUtils';
 
+const baseURL = (import.meta as any)?.env?.VITE_API_BASE_URL || (import.meta as any)?.env?.VITE_API_BASE || 'http://localhost:8085';
+
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:8085',
+  baseURL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -11,18 +13,12 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(config => {
   const token = getToken();
 
-  console.log('🔍 Request interceptor - Token from localStorage:', token ? 'Present' : 'Missing');
-  console.log('🔍 Request URL:', config.url);
-
   if (!config.headers) {
-    config.headers = {};
+    config.headers = {} as any;
   }
 
   if (token) {
-    config.headers['Authorization'] = `Bearer ${token}`;
-    console.log('✅ Authorization header added');
-  } else {
-    console.warn('⚠️ No token found - request will be unauthenticated');
+    (config.headers as any)['Authorization'] = `Bearer ${token}`;
   }
 
   return config;

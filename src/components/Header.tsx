@@ -16,6 +16,7 @@ export default function Header({ className }: HeaderProps) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { admin } = useSelector((state: RootState) => state.auth);
+  const displayName = admin?.name || ((admin?.role === 'staff') ? 'Staff' : 'Admin');
 
   const handleLogout = () => {
     dispatch(logout());
@@ -23,12 +24,18 @@ export default function Header({ className }: HeaderProps) {
     navigate('/login');
   };
 
-  const navigation = [
-    { name: 'Ticket', href: '/admin/flights', current: location.pathname.includes('/flights') },
-    { name: 'My Booking', href: '/admin/passengers', current: location.pathname.includes('/passengers') },
-    { name: 'History', href: '/admin/dashboard', current: location.pathname === '/admin/dashboard' },
-    { name: 'Favorite', href: '/admin/services', current: location.pathname.includes('/services') },
-  ];
+  const isStaff = admin?.role === 'staff';
+  const navigation = isStaff
+    ? [
+        { name: 'Check-in', href: '/staff/check-in', current: location.pathname.startsWith('/staff/check-in') },
+        { name: 'In-flight', href: '/staff/in-flight', current: location.pathname.startsWith('/staff/in-flight') },
+      ]
+    : [
+        { name: 'Flights', href: '/admin/flights', current: location.pathname.includes('/flights') },
+        { name: 'Passengers', href: '/admin/passengers', current: location.pathname.includes('/passengers') },
+        { name: 'Dashboard', href: '/admin/dashboard', current: location.pathname === '/admin/dashboard' },
+        { name: 'Services', href: '/admin/services', current: location.pathname.includes('/services') },
+      ];
 
   return (
     <header className={cn('bg-white border-b border-secondary-200 shadow-soft', className)}>
@@ -36,12 +43,12 @@ export default function Header({ className }: HeaderProps) {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <Link to="/admin/dashboard" className="flex items-center space-x-2">
+            <Link to={isStaff ? "/staff/check-in" : "/admin/dashboard"} className="flex items-center space-x-2">
               <div className="flex items-center space-x-1">
                 <div className="w-8 h-8 bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg flex items-center justify-center">
                   <div className="w-4 h-4 bg-white rounded-sm transform rotate-45"></div>
                 </div>
-                <span className="text-xl font-bold text-secondary-900">Dynamics</span>
+                <span className="text-xl font-bold text-secondary-900">Airline</span>
               </div>
             </Link>
           </div>
@@ -78,9 +85,9 @@ export default function Header({ className }: HeaderProps) {
             <div className="flex items-center space-x-3">
               <div className="hidden md:block text-right">
                 <p className="text-sm font-medium text-secondary-900">
-                  {admin?.name || 'Amelia Fitria'}
+                  {displayName}
                 </p>
-                <p className="text-xs text-secondary-500">Human Resources</p>
+                <p className="text-xs text-secondary-500">&nbsp;</p>
               </div>
               
               <div className="relative">
@@ -139,9 +146,9 @@ export default function Header({ className }: HeaderProps) {
             <div className="mt-4 pt-4 border-t border-secondary-200">
               <div className="px-3 py-2">
                 <p className="text-sm font-medium text-secondary-900">
-                  {admin?.name || 'Amelia Fitria'}
+                  {displayName}
                 </p>
-                <p className="text-xs text-secondary-500">Human Resources</p>
+                <p className="text-xs text-secondary-500">&nbsp;</p>
               </div>
             </div>
           </div>

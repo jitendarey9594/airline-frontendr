@@ -1,7 +1,6 @@
 import axiosInstance from './axiosInstance';
 import { getAllFlights } from './flightApi';
 import type { FlightService } from '../types/service';
-import type { Flight } from '../types/flight';
 
 // Get all services (then filter by flight on frontend if needed)
 export const getAllServices = async (): Promise<FlightService[]> => {
@@ -10,16 +9,21 @@ export const getAllServices = async (): Promise<FlightService[]> => {
     console.log('📋 Raw backend services:', response.data);
 
     // Transform backend format to frontend format
-    const transformedServices = response.data.map((service: any) => ({
-      id: service.serviceId || service.id,
-      serviceId: service.serviceId,
-      name: service.name,
-      type: service.type,
-      category: service.category,
-      price: service.price,
-      flightId: service.flight?.flightId || service.flightId,
-      flight: service.flight
-    }));
+    const transformedServices = response.data.map((service: any) => {
+      const typeUpper = String(service.type || '').toUpperCase();
+      const catLower = String(service.category || '').toLowerCase();
+      const derivedCategory = catLower || (typeUpper === 'ANCILLARY' ? 'ancillary' : typeUpper === 'MEAL' ? 'meal' : typeUpper === 'SHOPPING' ? 'shopping' : '');
+      return {
+        id: Number(service.serviceId || service.id),
+        serviceId: Number(service.serviceId || service.id),
+        name: service.name,
+        type: service.type,
+        category: derivedCategory,
+        price: Number(service.price),
+        flightId: Number(service.flight?.flightId || service.flightId),
+        flight: service.flight
+      };
+    });
 
     console.log('🔄 Transformed services:', transformedServices);
     return transformedServices;

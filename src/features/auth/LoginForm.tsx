@@ -25,7 +25,11 @@ const LoginForm = () => {
       const data = await loginAdmin(email, password);
       dispatch(setAuth({ token: data.token, admin: data.admin }));
       localStorage.setItem('token', data.token);
-      navigate('/admin/dashboard');
+      if (data.admin?.role === 'staff') {
+        navigate('/staff/dashboard');
+      } else {
+        navigate('/admin/dashboard');
+      }
     } catch {
       setError('Invalid credentials. Please try again.');
     } finally {
@@ -42,7 +46,7 @@ const LoginForm = () => {
             <div className="w-12 h-12 bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center">
               <Plane className="h-6 w-6 text-white" />
             </div>
-            <span className="text-3xl font-bold text-secondary-900">Dynamics</span>
+            <span className="text-3xl font-bold text-secondary-900">Airline</span>
           </div>
           <h1 className="text-2xl font-semibold text-secondary-900 mb-2">Welcome back</h1>
           <p className="text-secondary-600">Sign in to your admin account</p>
@@ -96,12 +100,7 @@ const LoginForm = () => {
           </CardContent>
         </Card>
 
-        {/* Footer */}
-        <div className="mt-8 text-center">
-          <p className="text-xs text-secondary-400">
-            © 2024 Dynamics Airlines. All rights reserved.
-          </p>
-        </div>
+
       </div>
     </div>
   );

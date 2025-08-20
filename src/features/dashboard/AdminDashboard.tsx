@@ -2,7 +2,7 @@ import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import type { RootState } from "../../redux/store";
 import { Card, CardContent, CardTitle, CardDescription } from "../../components/card";
-import { Plane, Users, ConciergeBell, BarChart3, Calendar, Settings } from "lucide-react";
+import { Plane, Users, ConciergeBell } from "lucide-react";
 import { motion } from "framer-motion";
 import Header from "../../components/Header";
 
@@ -36,12 +36,6 @@ export default function AdminDashboard() {
     }
   ];
 
-  const quickStats = [
-    { label: "Today's Flights", value: "12", change: "+2" },
-    { label: "Active Bookings", value: "847", change: "+15%" },
-    { label: "Revenue", value: "$24,500", change: "+8%" },
-    { label: "Satisfaction", value: "4.8/5", change: "+0.2" }
-  ];
 
   return (
     <div className="min-h-screen bg-background-secondary">
@@ -58,31 +52,6 @@ export default function AdminDashboard() {
           </p>
         </div>
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          {quickStats.map((stat, index) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-            >
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-secondary-600">{stat.label}</p>
-                      <p className="text-2xl font-bold text-secondary-900">{stat.value}</p>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-sm font-medium text-success-600">{stat.change}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
 
         {/* Main Dashboard Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
@@ -122,68 +91,7 @@ export default function AdminDashboard() {
           })}
         </div>
 
-        {/* Additional Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-          >
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-primary-100 rounded-xl">
-                    <BarChart3 className="h-5 w-5 text-primary-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-secondary-900">Analytics</h3>
-                    <p className="text-sm text-secondary-600">View detailed reports</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-          >
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-success-100 rounded-xl">
-                    <Calendar className="h-5 w-5 text-success-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-secondary-900">Schedule</h3>
-                    <p className="text-sm text-secondary-600">Manage flight schedules</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7 }}
-          >
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-warning-100 rounded-xl">
-                    <Settings className="h-5 w-5 text-warning-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-secondary-900">Settings</h3>
-                    <p className="text-sm text-secondary-600">System configuration</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </div>
       </main>
     </div>
   );
