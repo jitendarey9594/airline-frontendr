@@ -2,6 +2,21 @@ import axiosInstance from './axiosInstance';
 import { getAllFlights } from './flightApi';
 import type { FlightService } from '../types/service';
 
+// Map UI meal category (VEG, NON_VEG, etc.) to DB-friendly strings
+// Observed existing DB rows: type values like 'veg', 'non-veg' when category='meal'
+export const mapMealSubtype = (cat?: string | null) => {
+  if (!cat) return null;
+  const up = String(cat).toUpperCase();
+  switch (up) {
+    case 'VEG': return 'veg';
+    case 'NON_VEG': return 'non-veg';
+    case 'JAIN': return 'jain';
+    case 'VEGAN': return 'vegan';
+    case 'GLUTEN_FREE': return 'gluten_free';
+    default: return up.toLowerCase().replace('_', '-');
+  }
+};
+
 // Get all services (then filter by flight on frontend if needed)
 export const getAllServices = async (): Promise<FlightService[]> => {
   try {
@@ -53,6 +68,7 @@ export const getServiceById = async (id: number): Promise<FlightService> => {
     return response.data;
   } catch (error: any) {
     console.error('Failed to fetch service:', error);
+
     throw new Error(error.response?.data?.message || 'Failed to fetch service');
   }
 };
@@ -64,16 +80,18 @@ export const createService = async (data: FlightService): Promise<FlightService>
     // First, get the full flight details
     const flights = await getAllFlights();
     const flight = flights.find((f: any) => f.flightId === data.flightId);
+    if (!flight) throw new Error('Flight not found');
 
-    if (!flight) {
-      throw new Error('Flight not found');
-    }
+    // DB semantics observed:
+    // - services.category should be one of: 'ancillary' | 'meal' | 'shopping'
+    // - services.type for meals stores the meal subtype like 'veg' | 'non-veg'; otherwise null
+    const serviceCategory = String(data.type).toLowerCase();
+    const mealSubtype = data.type === 'MEAL' ? mapMealSubtype(data.category) : null;
 
-    // Transform to backend format - matching your Postman example
     const backendPayload = {
       name: data.name,
-      type: data.type?.toUpperCase() || null, // Ensure uppercase
-      category: data.category?.toLowerCase() || null, // Your example shows lowercase
+      type: mealSubtype, // only set for meals
+      category: serviceCategory, // 'ancillary' | 'meal' | 'shopping'
       price: data.price,
       flight: {
         flightId: flight.flightId,

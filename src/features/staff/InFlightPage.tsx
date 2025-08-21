@@ -6,6 +6,7 @@ import { getPassengers } from '../../api/passengerApi';
 import type { Passenger } from '../../types/passenger';
 import { fetchServicesByFlight } from '../../api/serviceApi';
 import type { FlightService } from '../../types/service';
+import { getPassengerServices, addPassengerService, removePassengerService } from '../../api/passengerServiceApi';
 
 import { getSeatsForFlight } from '../../api/seatApi';
 import type { Seat } from '../../types/seat';
@@ -14,6 +15,8 @@ export default function InFlightPage() {
   const [flightId, setFlightId] = useState<number | null>(null);
   const [passengers, setPassengers] = useState<Passenger[]>([]);
   const [seats, setSeats] = useState<Seat[]>([]);
+
+  const [selected, setSelected] = useState<Record<number, number[]>>({}); // passengerId -> serviceIds
 
   const [services, setServices] = useState<FlightService[]>([]);
 
@@ -25,6 +28,18 @@ export default function InFlightPage() {
       setPassengers(pf);
       setServices(await fetchServicesByFlight(flightId));
       setSeats(await getSeatsForFlight(flightId));
+
+      // Load per-passenger selected services
+      const map: Record<number, number[]> = {};
+      for (const p of pf) {
+        try {
+          const svcs = await getPassengerServices(p.passengerId);
+          map[p.passengerId] = svcs.map(s => s.serviceId ?? (s as any).id).filter(Boolean) as number[];
+        } catch {
+          map[p.passengerId] = [];
+        }
+      }
+      setSelected(map);
     })();
   }, [flightId]);
 
@@ -68,7 +83,7 @@ export default function InFlightPage() {
                     </thead>
                     <tbody>
                       {passengers.map(p => {
-                        const sel: number[] = [];
+                        const sel = selected[p.passengerId] || [];
 
                         const toggle = async (serviceId: number, has: boolean) => {
                           if (has) {
