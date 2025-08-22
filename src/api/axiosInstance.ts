@@ -17,8 +17,19 @@ axiosInstance.interceptors.request.use(config => {
     config.headers = {} as any;
   }
 
-  if (token) {
+  // Do NOT attach Authorization on auth endpoints (login/register/refresh)
+  const urlStr = String(config.url || '');
+  let pathOnly = urlStr;
+  try {
+    // Support absolute URLs and relative paths
+    pathOnly = new URL(urlStr, baseURL).pathname;
+  } catch {}
+  const isAuthRoute = /^\/?api\/auth(\/|$)/i.test(pathOnly);
+
+  if (!isAuthRoute && token) {
     (config.headers as any)['Authorization'] = `Bearer ${token}`;
+  } else if (isAuthRoute && (config.headers as any)['Authorization']) {
+    delete (config.headers as any)['Authorization'];
   }
 
   return config;

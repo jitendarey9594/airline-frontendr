@@ -28,7 +28,7 @@ export const loginAdmin = async (
   email: string,
   password: string
 ): Promise<AuthResponse> => {
-  const response = await axios.post<BackendAuthResponse>('http://localhost:8085/api/auth/login', {
+  const response = await axios.post<BackendAuthResponse>('/api/auth/login', {
     username: email,
     password,
   });
